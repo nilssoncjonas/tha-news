@@ -7,7 +7,7 @@ console.log('server started:', new Date().toLocaleString('sv-SE'));
 
 let count = 0;
 
-cron.schedule(' */31 * * * * ', async () => {
+cron.schedule(' 01,31 * * * * ', async () => {
 
 	const date = new Date();
 	console.log('Scraping every 30 min', date.toLocaleString('sv-SE'), ++count, 'times');
