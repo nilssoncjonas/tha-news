@@ -3,6 +3,7 @@
 		"node_modules",
 		"package.json",
 		"README.md",
-		"svt-latest.json"
+		"svt-latest.json",
+		"data/svt/*.json"
 	]
 }
