@@ -1,12 +1,13 @@
 import { readJSONFromFile, writeJSONToFile } from "./utils/json.js"
 import puppeteer from 'puppeteer';
+import { store } from './utils/store.js';
 
-const url = 'https://www.svt.se/'
+const url = 'https://www.svt.se'
 
-export const svtLatestNews = async () => {
+export const svtLatestNews = async (date) => {
 
 	const browser = await puppeteer.launch({ headless: true })
-	console.log('start')
+	console.log('started scraping')
 
 	const page = await browser.newPage()
 
@@ -27,15 +28,23 @@ export const svtLatestNews = async () => {
 	}, url)
 
 	await browser.close()
+	console.log('finished scraping')
 
-	console.log('saving')
-	// Read existing data from file
-	let existingData = readJSONFromFile('data/svt-latest.json')
-	// Remove duplicates from new data
+	let existingData = readJSONFromFile(`data/svt/${date}.json`)
+	
 	const uniqueNewData = data.filter(newItem => !existingData.some((existingItem) => existingItem.title === newItem.title));
-	// Append only unique data to existing data
-	const updatedData = [...uniqueNewData, ...existingData];
-	// Write the sorted data to file
-	writeJSONToFile('data/svt-latest.json', updatedData)
-	console.log('finished, New items:', uniqueNewData.length)
+	
+	if (uniqueNewData.length > 0) {		
+		console.log('New items found, storing...')
+		
+		await store(uniqueNewData)	
+		
+		const updatedData = [...uniqueNewData, ...existingData];
+		
+		writeJSONToFile(`data/svt/${date}.json`, updatedData)
+
+		console.log('finished, New items:', uniqueNewData.length)
+	} else {
+		console.log('No new items')
+	}
 }
