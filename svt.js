@@ -33,17 +33,30 @@ export const svtLatestNews = async (date) => {
 	let existingData = readJSONFromFile(`data/svt/${date}.json`)
 	
 	const uniqueNewData = data.filter(newItem => !existingData.some((existingItem) => existingItem.title === newItem.title));
-	
-	if (uniqueNewData.length > 0) {		
+
+// Get the current date to compare against
+const currentDate = new Date();
+
+// Filter out items that were published today
+const publishedToday = uniqueNewData.filter(item => {
+    // Convert the "published" field to a Date object
+    const publishedDate = new Date(item.published);
+
+    // Compare the date part (year, month, and day) only
+    return publishedDate.toDateString() === currentDate.toDateString();
+});
+	// console.log('publishedToday:', publishedToday.length, publishedToday)
+
+	if (publishedToday.length > 0) {		
 		console.log('New items found, storing...')
 		
-		await store(uniqueNewData)	
+		await store(publishedToday)	
 		
-		const updatedData = [...uniqueNewData, ...existingData];
+		const updatedData = [...publishedToday, ...existingData];
 		
 		writeJSONToFile(`data/svt/${date}.json`, updatedData)
 
-		console.log('finished, New items:', uniqueNewData.length)
+		console.log('finished, New items:', publishedToday.length)
 	} else {
 		console.log('No new items')
 	}
