@@ -7,7 +7,7 @@ console.log('server started:', new Date().toLocaleString('sv-SE'));
 
 let count = 0;
 
-cron.schedule(' */30 * * * * ', async () => {
+cron.schedule(' 01,31 5-23 * * * ', async () => {
 
 	const date = new Date();
 	console.log('Scraping every 30 min', date.toLocaleString('sv-SE'), ++count, 'times');
@@ -19,14 +19,14 @@ cron.schedule(' */30 * * * * ', async () => {
 	console.log('----------')
 }); 
 
-cron.schedule(' 0 0 * * *', async () => {
-	const date = new Date();
-	console.log(`Created new json store file ${date.toLocaleString('sv-SE')}.json`);
-	fs.appendFile(`${date.toLocaleString('sv-SE')}.json`, JSON.stringify([], (err) => {
-		if (err) {
-			console.error('Error writing file:', err);
-		} else {
-			console.log('File written successfully');
-		}
-	}))
-})
+// cron.schedule(' 0 0 * * *', async () => {
+// 	const date = new Date();
+// 	console.log(`Created new json store file ${date.toLocaleString('sv-SE')}.json`);
+// 	fs.appendFile(`${date.toLocaleString('sv-SE')}.json`, JSON.stringify([], (err) => {
+// 		if (err) {
+// 			console.error('Error writing file:', err);
+// 		} else {
+// 			console.log('File written successfully');
+// 		}
+// 	}))
+// })
