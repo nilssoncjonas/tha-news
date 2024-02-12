@@ -5,7 +5,7 @@ import { store } from './utils/store.js';
 const url = 'https://www.svt.se'
 
 export const svtLatestNews = async (date) => {
-
+	
 	const browser = await puppeteer.launch({ headless: true })
 	console.log('Getting data...')
 
@@ -30,27 +30,28 @@ export const svtLatestNews = async (date) => {
 	await browser.close()
 	console.log('Data received...')
 
+	console.log('Checking for items published today...') 
+	const filteredObjects = data.filter(object => {
+  const publishedDate = new Date(object.published).toLocaleDateString('sv-SE'); // Extract date from "published"
+  return publishedDate === date;
+	});
+	
+	// Getting existing data to compare against the new
 	let existingData = readJSONFromFile(`data/svt/${date}.json`)
 	
 	console.log('Checking for new items...')
-	// Filter out items that already exist
-	const uniqueNewData = data.filter(newItem => !existingData.some((existingItem) => existingItem.url === newItem.url));
+	const uniqueNewData = filteredObjects.filter(newItem => !existingData.some((existingItem) => existingItem.url === newItem.url));
 
-console.log('Checking for items published today...')
-	// Filter out items that were published today
-	const publishedToday = uniqueNewData.filter(item =>  new Date(item.published).toLocaleDateString() === date);
-
-	if (publishedToday.length > 0) {		
+	if (uniqueNewData.length > 0) {		
 		console.log('New items found, storing...')
 		
-		await store(publishedToday)	
+		await store(uniqueNewData)	
 		
-		// Merge new data with existing data
-		const updatedData = [...publishedToday, ...existingData];
+		const updatedData = [...uniqueNewData, ...existingData];
 		
 		writeJSONToFile(`data/svt/${date}.json`, updatedData)
 
-		console.log('finished, New items:', publishedToday.length)
+		console.log('finished, New items:', uniqueNewData.length)
 	} else {
 		console.log('No new items...')
 	}
