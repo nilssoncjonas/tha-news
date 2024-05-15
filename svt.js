@@ -5,9 +5,13 @@ import { store } from './utils/store.js';
 const url = 'https://www.svt.se'
 
 export const svtLatestNews = async (date) => {
+	const file = `data/logs/svt/latestNews/${date}.json`
+	const logs = readJSONFromFile(file)
 
 	const browser = await puppeteer.launch({ headless: true })
 	console.log('Getting data...')
+
+	const start = new Date().toLocaleTimeString('sv-SE')
 
 	const page = await browser.newPage()
 
@@ -31,6 +35,12 @@ export const svtLatestNews = async (date) => {
 	console.log('Data received...')
 	if (!data || data.length === 0) {
 		console.log('No data available')
+		const logItem = {
+			start,
+			"end": new Date().toLocaleTimeString('sv-SE'),
+			"data": data.length
+		}
+		writeJSONToFile(file, [logItem, ...logs])
 		return
 	}
 
@@ -54,9 +64,22 @@ export const svtLatestNews = async (date) => {
 		const updatedData = [...uniqueNewData, ...existingData];
 
 		writeJSONToFile(`data/svt/${date}.json`, updatedData)
-
+		const logItem = {
+			start,
+			"end": new Date().toLocaleTimeString('sv-SE'),
+			"newItems": uniqueNewData.length,
+			"stored": true 
+		}
+		writeJSONToFile(file, [logItem, ...logs])
 		console.log('finished, New items:', uniqueNewData.length)
 	} else {
 		console.log('No new items...')
+		const logItem = {
+			start,
+			"end": new Date().toLocaleTimeString('sv-SE'),
+			"newItems": 0,
+			"stored": false 
+		}
+		writeJSONToFile(file, [logItem, ...logs])
 	}
 }
